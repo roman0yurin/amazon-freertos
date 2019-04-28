@@ -1956,6 +1956,13 @@ Queue_t * const pxQueue = xQueue;
 } /*lint !e818 Pointer cannot be declared const as xQueue is a typedef not pointer. */
 /*-----------------------------------------------------------*/
 
+UBaseType_t uxQueueCapacity( const QueueHandle_t xQueue )
+{
+	Queue_t * const pxQueue = xQueue;
+	configASSERT( pxQueue );
+	return pxQueue->uxLength;
+}
+
 UBaseType_t uxQueueMessagesWaitingFromISR( const QueueHandle_t xQueue )
 {
 UBaseType_t uxReturn;
