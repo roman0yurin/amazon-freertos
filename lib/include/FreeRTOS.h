@@ -1087,6 +1087,7 @@ typedef struct xSTATIC_QUEUE
 		uint8_t ucDummy9;
 	#endif
 
+	void *pvDummyCustom[4];//Три указателя на функции и один на объект
 } StaticQueue_t;
 typedef StaticQueue_t StaticSemaphore_t;
 

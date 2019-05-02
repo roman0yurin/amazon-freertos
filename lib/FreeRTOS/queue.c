@@ -128,7 +128,41 @@ typedef struct QueueDefinition /* The old naming convention is used to prevent b
 		uint8_t ucQueueType;
 	#endif
 
+	/**Пользовательский объект для управления очередью**/
+	void *customController;
+
+	/**Функция для вставки следующего элемента в очередь (вместо простого копирования памяти)**/
+  void (*cellInsert)(int8_t *cell, const void *item, void *customController);
+
+  /**Извлечь значение из очереди для последущего использвания.
+   * Сразу после извлечения чейка будет обработана деструктором.
+   * !!Если использование значения требует продолжительного времени, то эту операцию следует выполнять уже после извлечения из очереди, чтобы не блокировать систему.
+   **/
+  void (*cellMoveOut)(int8_t *cell, void *item, bool copy, void *customController);
+
+	/**Функция для уничтожения бъекта в ячейке, на случай уничтожения очереди или если данная ячейка уже отработана и более не нужна**/
+	void (*cellDestructor)(int8_t *cell, void *customController);
 } xQUEUE;
+
+/**Установить объект, управляющий очередью**/
+void setQueueController(void *customController, QueueHandle_t queue){
+	queue->customController = customController;
+}
+
+/**Установить функцию для установки значений в очередь**/
+void setCellInsert(void (*cellInsert)(int8_t *cell, const void *item, void *customController), QueueHandle_t queue){
+	queue->cellInsert = cellInsert;
+}
+
+/**Функция для извлечения значений из очереди**/
+void setCellMoveOut(void (*cellMoveOut)(int8_t *cell, void *item, bool copy, void *customController), QueueHandle_t queue){
+	queue->cellMoveOut = cellMoveOut;
+}
+
+/**Функция для освобождения объектов в ячейках очереди.**/
+void setCellDestructor(void (*cellDestructor)(int8_t *cell, void *customController), QueueHandle_t queue){
+	queue->cellDestructor = cellDestructor;
+}
 
 /* The old xQUEUE name is maintained above then typedefed to the new Queue_t
 name below to enable the use of older kernel aware debuggers. */
@@ -196,7 +230,7 @@ static BaseType_t prvCopyDataToQueue( Queue_t * const pxQueue, const void *pvIte
 /*
  * Copies an item out of a queue.
  */
-static void prvCopyDataFromQueue( Queue_t * const pxQueue, void * const pvBuffer ) PRIVILEGED_FUNCTION;
+static void prvCopyDataFromQueue( Queue_t * const pxQueue, void * const pvBuffer, bool copy ) PRIVILEGED_FUNCTION;
 
 #if ( configUSE_QUEUE_SETS == 1 )
 	/*
@@ -260,6 +294,18 @@ Queue_t * const pxQueue = xQueue;
 
 	taskENTER_CRITICAL();
 	{
+
+		if(pxQueue->cellDestructor != NULL) {
+			//Уничтожаем все элементы очереди, которые не успели обработаться к моменту ее завершения.
+			for (int i = 0; i < pxQueue->uxMessagesWaiting; i++) {
+				pxQueue->cellDestructor(pxQueue->u.xQueue.pcReadFrom, pxQueue->customController);
+				pxQueue->u.xQueue.pcReadFrom += pxQueue->uxItemSize;
+				if (pxQueue->u.xQueue.pcReadFrom >= pxQueue->u.xQueue.pcTail){
+					pxQueue->u.xQueue.pcReadFrom = pxQueue->pcHead;
+				}
+			}
+		}
+
 		pxQueue->u.xQueue.pcTail = pxQueue->pcHead + ( pxQueue->uxLength * pxQueue->uxItemSize ); /*lint !e9016 Pointer arithmetic allowed on char types, especially when it assists conveying intent. */
 		pxQueue->uxMessagesWaiting = ( UBaseType_t ) 0U;
 		pxQueue->pcWriteTo = pxQueue->pcHead;
@@ -431,6 +477,10 @@ static void prvInitialiseNewQueue( const UBaseType_t uxQueueLength, const UBaseT
 	/* Remove compiler warnings about unused parameters should
 	configUSE_TRACE_FACILITY not be set to 1. */
 	( void ) ucQueueType;
+	pxNewQueue->customController = NULL;
+	pxNewQueue->cellInsert = NULL;
+	pxNewQueue->cellMoveOut = NULL;
+	pxNewQueue->cellDestructor = NULL;
 
 	if( uxItemSize == ( UBaseType_t ) 0 )
 	{
@@ -1305,7 +1355,7 @@ Queue_t * const pxQueue = xQueue;
 			if( uxMessagesWaiting > ( UBaseType_t ) 0 )
 			{
 				/* Data available, remove one item. */
-				prvCopyDataFromQueue( pxQueue, pvBuffer );
+				prvCopyDataFromQueue( pxQueue, pvBuffer, false );
 				traceQUEUE_RECEIVE( pxQueue );
 				pxQueue->uxMessagesWaiting = uxMessagesWaiting - ( UBaseType_t ) 1;
 
@@ -1669,7 +1719,7 @@ Queue_t * const pxQueue = xQueue;
 				data, not removing it. */
 				pcOriginalReadPosition = pxQueue->u.xQueue.pcReadFrom;
 
-				prvCopyDataFromQueue( pxQueue, pvBuffer );
+				prvCopyDataFromQueue( pxQueue, pvBuffer, true);
 				traceQUEUE_PEEK( pxQueue );
 
 				/* The data is not being removed, so reset the read pointer. */
@@ -1814,7 +1864,7 @@ Queue_t * const pxQueue = xQueue;
 
 			traceQUEUE_RECEIVE_FROM_ISR( pxQueue );
 
-			prvCopyDataFromQueue( pxQueue, pvBuffer );
+			prvCopyDataFromQueue( pxQueue, pvBuffer, false );
 			pxQueue->uxMessagesWaiting = uxMessagesWaiting - ( UBaseType_t ) 1;
 
 			/* If the queue is locked the event list will not be modified.
@@ -1906,7 +1956,7 @@ Queue_t * const pxQueue = xQueue;
 			/* Remember the read position so it can be reset as nothing is
 			actually being removed from the queue. */
 			pcOriginalReadPosition = pxQueue->u.xQueue.pcReadFrom;
-			prvCopyDataFromQueue( pxQueue, pvBuffer );
+			prvCopyDataFromQueue( pxQueue, pvBuffer, true );
 			pxQueue->u.xQueue.pcReadFrom = pcOriginalReadPosition;
 
 			xReturn = pdPASS;
@@ -1981,6 +2031,17 @@ Queue_t * const pxQueue = xQueue;
 
 	configASSERT( pxQueue );
 	traceQUEUE_DELETE( pxQueue );
+
+	if(pxQueue->cellDestructor != NULL) {
+		//Уничтожаем все элементы очереди, которые не успели обработаться к моменту ее завершения.
+		for (int i = 0; i < pxQueue->uxMessagesWaiting; i++) {
+			pxQueue->cellDestructor(pxQueue->u.xQueue.pcReadFrom, pxQueue->customController);
+			pxQueue->u.xQueue.pcReadFrom += pxQueue->uxItemSize;
+			if (pxQueue->u.xQueue.pcReadFrom >= pxQueue->u.xQueue.pcTail){
+				pxQueue->u.xQueue.pcReadFrom = pxQueue->pcHead;
+			}
+		}
+	}
 
 	#if ( configQUEUE_REGISTRY_SIZE > 0 )
 	{
@@ -2102,7 +2163,10 @@ UBaseType_t uxMessagesWaiting;
 	}
 	else if( xPosition == queueSEND_TO_BACK )
 	{
-		( void ) memcpy( ( void * ) pxQueue->pcWriteTo, pvItemToQueue, ( size_t ) pxQueue->uxItemSize ); /*lint !e961 !e418 !e9087 MISRA exception as the casts are only redundant for some ports, plus previous logic ensures a null pointer can only be passed to memcpy() if the copy size is 0.  Cast to void required by function signature and safe as no alignment requirement and copy length specified in bytes. */
+		if(pxQueue->cellInsert != NULL)
+			pxQueue->cellInsert(pxQueue->pcWriteTo, pvItemToQueue, pxQueue->customController);
+		else
+			( void ) memcpy( ( void * ) pxQueue->pcWriteTo, pvItemToQueue, ( size_t ) pxQueue->uxItemSize ); /*lint !e961 !e418 !e9087 MISRA exception as the casts are only redundant for some ports, plus previous logic ensures a null pointer can only be passed to memcpy() if the copy size is 0.  Cast to void required by function signature and safe as no alignment requirement and copy length specified in bytes. */
 		pxQueue->pcWriteTo += pxQueue->uxItemSize; /*lint !e9016 Pointer arithmetic on char types ok, especially in this use case where it is the clearest way of conveying intent. */
 		if( pxQueue->pcWriteTo >= pxQueue->u.xQueue.pcTail ) /*lint !e946 MISRA exception justified as comparison of pointers is the cleanest solution. */
 		{
@@ -2115,7 +2179,10 @@ UBaseType_t uxMessagesWaiting;
 	}
 	else
 	{
-		( void ) memcpy( ( void * ) pxQueue->u.xQueue.pcReadFrom, pvItemToQueue, ( size_t ) pxQueue->uxItemSize ); /*lint !e961 !e9087 !e418 MISRA exception as the casts are only redundant for some ports.  Cast to void required by function signature and safe as no alignment requirement and copy length specified in bytes.  Assert checks null pointer only used when length is 0. */
+		if(pxQueue->cellInsert != NULL)
+			pxQueue->cellInsert(pxQueue->u.xQueue.pcReadFrom, pvItemToQueue, pxQueue->customController);
+		else
+			( void ) memcpy( ( void * ) pxQueue->u.xQueue.pcReadFrom, pvItemToQueue, ( size_t ) pxQueue->uxItemSize ); /*lint !e961 !e9087 !e418 MISRA exception as the casts are only redundant for some ports.  Cast to void required by function signature and safe as no alignment requirement and copy length specified in bytes.  Assert checks null pointer only used when length is 0. */
 		pxQueue->u.xQueue.pcReadFrom -= pxQueue->uxItemSize;
 		if( pxQueue->u.xQueue.pcReadFrom < pxQueue->pcHead ) /*lint !e946 MISRA exception justified as comparison of pointers is the cleanest solution. */
 		{
@@ -2153,7 +2220,7 @@ UBaseType_t uxMessagesWaiting;
 }
 /*-----------------------------------------------------------*/
 
-static void prvCopyDataFromQueue( Queue_t * const pxQueue, void * const pvBuffer )
+static void prvCopyDataFromQueue( Queue_t * const pxQueue, void * const pvBuffer, bool copy  )
 {
 	if( pxQueue->uxItemSize != ( UBaseType_t ) 0 )
 	{
@@ -2166,7 +2233,14 @@ static void prvCopyDataFromQueue( Queue_t * const pxQueue, void * const pvBuffer
 		{
 			mtCOVERAGE_TEST_MARKER();
 		}
-		( void ) memcpy( ( void * ) pvBuffer, ( void * ) pxQueue->u.xQueue.pcReadFrom, ( size_t ) pxQueue->uxItemSize ); /*lint !e961 !e418 !e9087 MISRA exception as the casts are only redundant for some ports.  Also previous logic ensures a null pointer can only be passed to memcpy() when the count is 0.  Cast to void required by function signature and safe as no alignment requirement and copy length specified in bytes. */
+
+		if(pxQueue->cellMoveOut != NULL)
+			pxQueue->cellMoveOut(pxQueue->u.xQueue.pcReadFrom, pvBuffer, copy, pxQueue->customController);
+		else
+			( void ) memcpy( ( void * ) pvBuffer, ( void * ) pxQueue->u.xQueue.pcReadFrom, ( size_t ) pxQueue->uxItemSize ); /*lint !e961 !e418 !e9087 MISRA exception as the casts are only redundant for some ports.  Also previous logic ensures a null pointer can only be passed to memcpy() when the count is 0.  Cast to void required by function signature and safe as no alignment requirement and copy length specified in bytes. */
+
+		if(!copy && pxQueue->cellDestructor != NULL)
+			pxQueue->cellDestructor(pxQueue->u.xQueue.pcReadFrom, pxQueue->customController);
 	}
 }
 /*-----------------------------------------------------------*/
@@ -2500,7 +2574,13 @@ Queue_t * const pxQueue = xQueue;
 					mtCOVERAGE_TEST_MARKER();
 				}
 				--( pxQueue->uxMessagesWaiting );
-				( void ) memcpy( ( void * ) pvBuffer, ( void * ) pxQueue->u.xQueue.pcReadFrom, ( unsigned ) pxQueue->uxItemSize );
+				if(pxQueue->cellMoveOut != NULL)
+					pxQueue->cellMoveOut(pxQueue->u.xQueue.pcReadFrom, pvBuffer, pxQueue->customController);
+				else
+					( void ) memcpy( ( void * ) pvBuffer, ( void * ) pxQueue->u.xQueue.pcReadFrom, ( unsigned ) pxQueue->uxItemSize );
+
+				if(pxQueue->cellDestructor != NULL)
+					pxQueue->cellDestructor(pxQueue->u.xQueue.pcReadFrom, pxQueue->customController);
 
 				xReturn = pdPASS;
 
@@ -2608,7 +2688,10 @@ Queue_t * const pxQueue = xQueue;
 				mtCOVERAGE_TEST_MARKER();
 			}
 			--( pxQueue->uxMessagesWaiting );
-			( void ) memcpy( ( void * ) pvBuffer, ( void * ) pxQueue->u.xQueue.pcReadFrom, ( unsigned ) pxQueue->uxItemSize );
+			if(pxQueue->cellMoveOut != NULL)
+				pxQueue->cellMoveOut(pxQueue->u.xQueue.pcReadFrom, pvBuffer, pxQueue->customController);
+			else
+				( void ) memcpy( ( void * ) pvBuffer, ( void * ) pxQueue->u.xQueue.pcReadFrom, ( unsigned ) pxQueue->uxItemSize );
 
 			if( ( *pxCoRoutineWoken ) == pdFALSE )
 			{

@@ -38,6 +38,7 @@ extern "C" {
 #endif
 
 #include "task.h"
+#include <stdbool.h>
 
 /**
  * Type by which queues are referenced.  For example, a call to xQueueCreate()
@@ -1648,10 +1649,20 @@ void vQueueSetQueueNumber( QueueHandle_t xQueue, UBaseType_t uxQueueNumber ) PRI
 UBaseType_t uxQueueGetQueueNumber( QueueHandle_t xQueue ) PRIVILEGED_FUNCTION;
 uint8_t ucQueueGetQueueType( QueueHandle_t xQueue ) PRIVILEGED_FUNCTION;
 
+/**Установить объект, управляющий очередью**/
+void setQueueController(void *customController, QueueHandle_t queue);
+
+/**Установить функцию для установки значений в очередь**/
+void setCellInsert(void (*cellInsert)(int8_t *cell, const void *item, void *customController), QueueHandle_t queue);
+
+/**Функция для извлечения значений из очереди**/
+void setCellMoveOut(void (*cellMoveOut)(int8_t *cell, void *item, bool copy, void *customController), QueueHandle_t queue);
+
+/**Функция для освобождения объектов в ячейках очереди.**/
+void setCellDestructor(void (*cellDestructor)(int8_t *cell, void *customController), QueueHandle_t queue);
 
 #ifdef __cplusplus
 }
 #endif
-
 #endif /* QUEUE_H */
 
