@@ -37,8 +37,8 @@ typedef void (*TaskFunction_t)( void * );
 /* Converts a time in milliseconds to a time in ticks.  This macro can be
 overridden by a macro of the same name defined in FreeRTOSConfig.h in case the
 definition here is not suitable for your application. */
-#ifndef pdMS_TO_TICKS
-	#define pdMS_TO_TICKS( xTimeInMs ) ( ( TickType_t ) ( ( ( TickType_t ) ( xTimeInMs ) * ( TickType_t ) configTICK_RATE_HZ ) / ( TickType_t ) 1000 ) )
+#ifndef pdMS_TO_TICKS //portMAX_DELAY символизирует бесконечное ожидание, по этому конвертация должна оставлять его без изменений
+	#define pdMS_TO_TICKS( xTimeInMs ) (xTimeInMs == portMAX_DELAY) ? portMAX_DELAY : ( ( TickType_t ) ( ( ( TickType_t ) ( xTimeInMs ) * ( TickType_t ) configTICK_RATE_HZ ) / ( TickType_t ) 1000 ) )
 #endif
 
 #define pdFALSE			( ( BaseType_t ) 0 )
