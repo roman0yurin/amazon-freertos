@@ -25,6 +25,9 @@ file(GLOB FREE_RTOS_SRC lib/FreeRTOS/*.c lib/FreeRTOS-Plus-POSIX/source/*.c)
 file(GLOB SOURCES
 				lib/FreeRTOS/portable${RTOS_PORT}/*.c
 				lib/FreeRTOS/portable/MemMang/heap_${RTOS_HEAP_TYPE}.c)
+
+SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=gnu99 -Wno-cast-function-type")
+
 additionalSources("${FREE_RTOS_SRC}")
 additionalSources("${SOURCES}")
 configureModule()

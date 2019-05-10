@@ -297,7 +297,7 @@ Queue_t * const pxQueue = xQueue;
 
 		if(pxQueue->cellDestructor != NULL) {
 			//Уничтожаем все элементы очереди, которые не успели обработаться к моменту ее завершения.
-			for (int i = 0; i < pxQueue->uxMessagesWaiting; i++) {
+			for (size_t i = 0; i < pxQueue->uxMessagesWaiting; i++) {
 				pxQueue->cellDestructor(pxQueue->u.xQueue.pcReadFrom, pxQueue->customController);
 				pxQueue->u.xQueue.pcReadFrom += pxQueue->uxItemSize;
 				if (pxQueue->u.xQueue.pcReadFrom >= pxQueue->u.xQueue.pcTail){
@@ -2034,7 +2034,7 @@ Queue_t * const pxQueue = xQueue;
 
 	if(pxQueue->cellDestructor != NULL) {
 		//Уничтожаем все элементы очереди, которые не успели обработаться к моменту ее завершения.
-		for (int i = 0; i < pxQueue->uxMessagesWaiting; i++) {
+		for (size_t i = 0; i < pxQueue->uxMessagesWaiting; i++) {
 			pxQueue->cellDestructor(pxQueue->u.xQueue.pcReadFrom, pxQueue->customController);
 			pxQueue->u.xQueue.pcReadFrom += pxQueue->uxItemSize;
 			if (pxQueue->u.xQueue.pcReadFrom >= pxQueue->u.xQueue.pcTail){
@@ -2238,9 +2238,6 @@ static void prvCopyDataFromQueue( Queue_t * const pxQueue, void * const pvBuffer
 			pxQueue->cellMoveOut(pxQueue->u.xQueue.pcReadFrom, pvBuffer, copy, pxQueue->customController);
 		else
 			( void ) memcpy( ( void * ) pvBuffer, ( void * ) pxQueue->u.xQueue.pcReadFrom, ( size_t ) pxQueue->uxItemSize ); /*lint !e961 !e418 !e9087 MISRA exception as the casts are only redundant for some ports.  Also previous logic ensures a null pointer can only be passed to memcpy() when the count is 0.  Cast to void required by function signature and safe as no alignment requirement and copy length specified in bytes. */
-
-		if(!copy && pxQueue->cellDestructor != NULL)
-			pxQueue->cellDestructor(pxQueue->u.xQueue.pcReadFrom, pxQueue->customController);
 	}
 }
 /*-----------------------------------------------------------*/
@@ -2578,9 +2575,6 @@ Queue_t * const pxQueue = xQueue;
 					pxQueue->cellMoveOut(pxQueue->u.xQueue.pcReadFrom, pvBuffer, pxQueue->customController);
 				else
 					( void ) memcpy( ( void * ) pvBuffer, ( void * ) pxQueue->u.xQueue.pcReadFrom, ( unsigned ) pxQueue->uxItemSize );
-
-				if(pxQueue->cellDestructor != NULL)
-					pxQueue->cellDestructor(pxQueue->u.xQueue.pcReadFrom, pxQueue->customController);
 
 				xReturn = pdPASS;
 
