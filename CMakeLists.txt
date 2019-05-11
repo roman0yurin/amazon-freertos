@@ -21,10 +21,12 @@ additionalImport(${CMAKE_CURRENT_SOURCE_DIR}/lib/FreeRTOS-Plus-POSIX/include/por
 additionalImport(${CMAKE_CURRENT_SOURCE_DIR}/lib/include/private)
 additionalImport(${CMAKE_CURRENT_SOURCE_DIR}/lib/FreeRTOS/portable${RTOS_PORT})
 
-file(GLOB FREE_RTOS_SRC lib/FreeRTOS/*.c lib/FreeRTOS-Plus-POSIX/source/*.c)
+file(GLOB FREE_RTOS_SRC lib/FreeRTOS/*.c lib/FreeRTOS/debug/*.cpp lib/FreeRTOS-Plus-POSIX/source/*.c)
 file(GLOB SOURCES
 				lib/FreeRTOS/portable${RTOS_PORT}/*.c
-				lib/FreeRTOS/portable/MemMang/heap_${RTOS_HEAP_TYPE}.c)
+				lib/FreeRTOS/portable/MemMang/heap_${RTOS_HEAP_TYPE}.c
+				lib/FreeRTOS/portable/Common/*.c
+	)
 
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=gnu99 -Wno-cast-function-type")
 

@@ -48,18 +48,7 @@ extern "C" {
 #define tskKERNEL_VERSION_MINOR 1
 #define tskKERNEL_VERSION_BUILD 1
 
-/**
- * task. h
- *
- * Type by which tasks are referenced.  For example, a call to xTaskCreate
- * returns (via a pointer parameter) an TaskHandle_t variable that can then
- * be used as a parameter to vTaskDelete to delete the task.
- *
- * \defgroup TaskHandle_t TaskHandle_t
- * \ingroup Tasks
- */
-struct tskTaskControlBlock; /* The old naming convention is used to prevent breaking kernel aware debuggers. */
-typedef struct tskTaskControlBlock* TaskHandle_t;
+#include "taskDecl.h"
 
 /*
  * Defines the prototype to which the application task hook function must
