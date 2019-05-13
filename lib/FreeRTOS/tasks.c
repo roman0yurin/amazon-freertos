@@ -2308,8 +2308,9 @@ UBaseType_t uxTaskGetNumberOfTasks( void )
 
 char *pcTaskGetName( TaskHandle_t xTaskToQuery ) /*lint !e971 Unqualified char types are allowed for strings and single characters only. */
 {
-TCB_t *pxTCB;
-
+	if(xTaskToQuery == NULL)
+		return "<none>";
+	TCB_t *pxTCB;
 	/* If null is passed in here then the name of the calling task is being
 	queried. */
 	pxTCB = prvGetTCBFromHandle( xTaskToQuery );
@@ -5117,4 +5118,23 @@ when performing module tests). */
 
 #endif
 
+
+void stackBounds(TaskHandle_t task, size_t **begin, size_t **end, size_t **stackPointer){
+	*begin = (size_t *)task->pxEndOfStack;
+	*end = (size_t *)task->pxStack;
+	if(pxCurrentTCB == task){
+		*stackPointer = _NULL;
+	}else{
+		*stackPointer = (size_t *)task->pxTopOfStack;
+	}
+}
+
+/**Проверяем, что небыло превышения стека, с запасом в buffer (в словах, по отношению к текущему положению**/
+void check4StackOverflow(size_t buffer){
+	if(pxCurrentTCB != NULL) {
+		taskCHECK_FOR_STACK_OVERFLOW();
+		if (pxCurrentTCB->pxTopOfStack + buffer >= pxCurrentTCB->pxEndOfStack)
+			vApplicationStackOverflowHook((TaskHandle_t) pxCurrentTCB, pxCurrentTCB->pcTaskName);
+	}
+}
 

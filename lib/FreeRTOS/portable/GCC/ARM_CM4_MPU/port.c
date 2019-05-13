@@ -554,6 +554,7 @@ static void vPortEnableVFP( void )
 
 static void prvSetupMPU( void )
 {
+#if RTOS_USE_MPU
 extern uint32_t __privileged_functions_end__[];
 extern uint32_t __FLASH_segment_start__[];
 extern uint32_t __FLASH_segment_end__[];
@@ -612,6 +613,7 @@ extern uint32_t __privileged_data_end__[];
 		/* Enable the MPU with the background region configured. */
 		portMPU_CTRL_REG |= ( portMPU_ENABLE | portMPU_BACKGROUND_ENABLE );
 	}
+#endif
 }
 /*-----------------------------------------------------------*/
 

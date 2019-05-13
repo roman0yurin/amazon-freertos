@@ -1,8 +1,8 @@
 /**
 * @author Юрин Роман on 11.05.19.
 **/
-#if  TRACE_FREE_RTOS
 #include "core/log/logger.h"
+#if  TRACE_FREE_RTOS
 extern "C"{
 	#include "FreeRTOS.h"
 	#include "RtosTracing.h"
@@ -24,31 +24,31 @@ extern "C"{
 	}
 
 	void traceBLOCKING_ON_QUEUE_RECEIVE(QueueHandle_t xQueue){
-		printfDebug("task %s wait receive from queue %x", pcTaskGetTaskName(xTaskGetCurrentTaskHandle()), reinterpret_cast<uintptr_t>(xQueue));
+		printfDebug("task %s wait receive from queue 0x%x", pcTaskGetTaskName(xTaskGetCurrentTaskHandle()), reinterpret_cast<uintptr_t>(xQueue));
 	}
 
 	void traceBLOCKING_ON_QUEUE_SEND_F(QueueHandle_t xQueue){
-		printfDebug("task %s wait send to queue %x", pcTaskGetTaskName(xTaskGetCurrentTaskHandle()), reinterpret_cast<uintptr_t>(xQueue));
+		printfDebug("task %s wait send to queue 0x%x", pcTaskGetTaskName(xTaskGetCurrentTaskHandle()), reinterpret_cast<uintptr_t>(xQueue));
 	}
 
 	void traceGIVE_MUTEX_RECURSIVE(QueueHandle_t xMutex){
-		printfDebug("task %s give recursive mutex %x", pcTaskGetTaskName(xTaskGetCurrentTaskHandle()), reinterpret_cast<uintptr_t>(xMutex));
+		printfDebug("task %s give recursive mutex 0x%x", pcTaskGetTaskName(xTaskGetCurrentTaskHandle()), reinterpret_cast<uintptr_t>(xMutex));
 	}
 
 	void traceGIVE_MUTEX_RECURSIVE_FAILED(QueueHandle_t xMutex){
-		printfInfo("task %s FAILED give recursive mutex %x", pcTaskGetTaskName(xTaskGetCurrentTaskHandle()), reinterpret_cast<uintptr_t>(xMutex));
+		printfInfo("task %s FAILED give recursive mutex 0x%x", pcTaskGetTaskName(xTaskGetCurrentTaskHandle()), reinterpret_cast<uintptr_t>(xMutex));
 	}
 
 	void traceQUEUE_CREATE(QueueHandle_t xQueue){
-		printfInfo("task %s create queue %x", pcTaskGetTaskName(xTaskGetCurrentTaskHandle()), reinterpret_cast<uintptr_t>(xQueue));
+		printfInfo("task %s create queue 0x%x", pcTaskGetTaskName(xTaskGetCurrentTaskHandle()), reinterpret_cast<uintptr_t>(xQueue));
 	}
 
 	void traceQUEUE_CREATE_FAILED(uint8_t ucQueueType){
-		printfSevere("task %s create FAILED queue, type %x", pcTaskGetTaskName(xTaskGetCurrentTaskHandle()), ucQueueType);
+		printfSevere("task %s create FAILED queue, type 0x%x", pcTaskGetTaskName(xTaskGetCurrentTaskHandle()), ucQueueType);
 	}
 
 	void traceCREATE_MUTEX(QueueHandle_t pxNewMutex){
-		printfInfo("task %s create mutex %x", pcTaskGetTaskName(xTaskGetCurrentTaskHandle()), reinterpret_cast<uintptr_t>(pxNewMutex));
+		printfInfo("task %s create mutex 0x%x", pcTaskGetTaskName(xTaskGetCurrentTaskHandle()), reinterpret_cast<uintptr_t>(pxNewMutex));
 	}
 
 	void traceCREATE_MUTEX_FAILED(){
@@ -56,7 +56,7 @@ extern "C"{
 	}
 
 	void traceTAKE_MUTEX_RECURSIVE(QueueHandle_t xMutex){
-		printfDebug("task %s take recursive mutex %x", pcTaskGetTaskName(xTaskGetCurrentTaskHandle()), reinterpret_cast<uintptr_t>(xMutex));
+		printfDebug("task %s take recursive mutex 0x%x", pcTaskGetTaskName(xTaskGetCurrentTaskHandle()), reinterpret_cast<uintptr_t>(xMutex));
 	}
 
 	void traceCREATE_COUNTING_SEMAPHORE(){
@@ -68,43 +68,43 @@ extern "C"{
 	}
 
 	void traceQUEUE_SEND(QueueHandle_t xQueue){
-		printfDebug("task %s send queue %x", pcTaskGetTaskName(xTaskGetCurrentTaskHandle()), reinterpret_cast<uintptr_t>(xQueue));
+		printfDebug("task %s send queue 0x%x", pcTaskGetTaskName(xTaskGetCurrentTaskHandle()), reinterpret_cast<uintptr_t>(xQueue));
 	}
 
 	void traceQUEUE_SEND_FAILED(QueueHandle_t xQueue){
-		printfWarning("task %s send queue %x FAILED", pcTaskGetTaskName(xTaskGetCurrentTaskHandle()), reinterpret_cast<uintptr_t>(xQueue));
+		printfWarning("task %s send queue 0x%x FAILED", pcTaskGetTaskName(xTaskGetCurrentTaskHandle()), reinterpret_cast<uintptr_t>(xQueue));
 	}
 
 	void traceQUEUE_RECEIVE(QueueHandle_t xQueue){
-		printfDebug("task %s receive queue %x", pcTaskGetTaskName(xTaskGetCurrentTaskHandle()), reinterpret_cast<uintptr_t>(xQueue));
+		printfDebug("task %s receive queue 0x%x", pcTaskGetTaskName(xTaskGetCurrentTaskHandle()), reinterpret_cast<uintptr_t>(xQueue));
 	}
 
 	void traceQUEUE_RECEIVE_FROM_ISR(QueueHandle_t xQueue){
-		printfDebug("ISR task %s receive queue %x", pcTaskGetTaskName(xTaskGetCurrentTaskHandle()), reinterpret_cast<uintptr_t>(xQueue));
+		printfDebug("ISR task %s receive queue 0x%x", pcTaskGetTaskName(xTaskGetCurrentTaskHandle()), reinterpret_cast<uintptr_t>(xQueue));
 	}
 
 	void traceQUEUE_RECEIVE_FROM_ISR_FAILED(QueueHandle_t xQueue){
-		printfInfo("ISR task %s receive queue %x FAILED", pcTaskGetTaskName(xTaskGetCurrentTaskHandle()), reinterpret_cast<uintptr_t>(xQueue));
+		printfInfo("ISR task %s receive queue 0x%x FAILED", pcTaskGetTaskName(xTaskGetCurrentTaskHandle()), reinterpret_cast<uintptr_t>(xQueue));
 	}
 
 	void traceQUEUE_RECEIVE_FAILED(QueueHandle_t xQueue){
-		printfInfo("task %s receive queue %x FAILED", pcTaskGetTaskName(xTaskGetCurrentTaskHandle()), reinterpret_cast<uintptr_t>(xQueue));
+		printfInfo("task %s receive queue 0x%x FAILED", pcTaskGetTaskName(xTaskGetCurrentTaskHandle()), reinterpret_cast<uintptr_t>(xQueue));
 	}
 
 	void traceQUEUE_PEEK(QueueHandle_t xQueue){
-		printfDebug("task %s receive peek %x", pcTaskGetTaskName(xTaskGetCurrentTaskHandle()), reinterpret_cast<uintptr_t>(xQueue));
+		printfDebug("task %s receive peek 0x%x", pcTaskGetTaskName(xTaskGetCurrentTaskHandle()), reinterpret_cast<uintptr_t>(xQueue));
 	}
 
 	void traceQUEUE_SEND_FROM_ISR(QueueHandle_t xQueue){
-		printfDebug("ISR send queue %x", pcTaskGetTaskName(xTaskGetCurrentTaskHandle()), reinterpret_cast<uintptr_t>(xQueue));
+		printfDebug("ISR send queue 0x%x", pcTaskGetTaskName(xTaskGetCurrentTaskHandle()), reinterpret_cast<uintptr_t>(xQueue));
 	}
 
 	void traceQUEUE_SEND_FROM_ISR_FAILED(QueueHandle_t xQueue){
-		printfWarning("ISR send queue %x FAILED", pcTaskGetTaskName(xTaskGetCurrentTaskHandle()), reinterpret_cast<uintptr_t>(xQueue));
+		printfWarning("ISR send queue 0x%x FAILED", pcTaskGetTaskName(xTaskGetCurrentTaskHandle()), reinterpret_cast<uintptr_t>(xQueue));
 	}
 
 	void traceQUEUE_DELETE(QueueHandle_t xQueue){
-		printfInfo("task %s delete queue %x", pcTaskGetTaskName(xTaskGetCurrentTaskHandle()), reinterpret_cast<uintptr_t>(xQueue));
+		printfInfo("task %s delete queue 0x%x", pcTaskGetTaskName(xTaskGetCurrentTaskHandle()), reinterpret_cast<uintptr_t>(xQueue));
 	}
 
   void traceTASK_CREATE(TaskHandle_t xTask){
@@ -144,15 +144,15 @@ extern "C"{
 	}
 
 	void traceTIMER_COMMAND_RECEIVED(void *pxTimer, size_t xCommandID, size_t xCommandValue){
-		printfDebug("timer %x received command %du value %du", reinterpret_cast<uintptr_t>(pxTimer), xCommandID, xCommandValue);
+		printfDebug("timer 0x%x received command %du value %du", reinterpret_cast<uintptr_t>(pxTimer), xCommandID, xCommandValue);
 	}
 
 	void traceTIMER_COMMAND_SEND(void *pxTimer, size_t xCommandID, size_t xCommandValue, size_t xStatus){
-		printfDebug("timer %x received command %du value %du status %du", reinterpret_cast<uintptr_t>(pxTimer), xCommandID, xCommandValue, xStatus);
+		printfDebug("timer 0x%x received command %du value %du status %du", reinterpret_cast<uintptr_t>(pxTimer), xCommandID, xCommandValue, xStatus);
 	}
 
 	void traceTIMER_CREATE(void * pxNewTimer){
-		printfDebug("create timer %x", reinterpret_cast<uintptr_t>(pxNewTimer));
+		printfDebug("create timer 0x%x", reinterpret_cast<uintptr_t>(pxNewTimer));
 	}
 
 	void traceTIMER_CREATE_FAILED(){
@@ -160,7 +160,7 @@ extern "C"{
 	}
 
 	void traceTIMER_EXPIRED(void *pxTimer){
-		printfWarning("timer %x expired", reinterpret_cast<uintptr_t>(pxTimer));
+		printfWarning("timer 0x%x expired", reinterpret_cast<uintptr_t>(pxTimer));
 	}
 }
 

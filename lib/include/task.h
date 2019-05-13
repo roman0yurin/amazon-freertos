@@ -2318,6 +2318,14 @@ TaskHandle_t pvTaskIncrementMutexHeldCount( void ) PRIVILEGED_FUNCTION;
  */
 void vTaskInternalSetTimeOutState( TimeOut_t * const pxTimeOut ) PRIVILEGED_FUNCTION;
 
+/**
+ * Возвращает верхнюю и нижнюю границу памяти, выделенно для стека данной задачи
+ **/
+void stackBounds(TaskHandle_t task, size_t **begin, size_t **end, size_t **stackPointer);
+
+
+/**Проверяем, что небыло превышения стека, с запасом в buffer (в словах, по отношению к текущему положению**/
+void check4StackOverflow(size_t buffer);
 
 #ifdef __cplusplus
 }
