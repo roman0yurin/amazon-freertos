@@ -25,7 +25,7 @@ file(GLOB FREE_RTOS_SRC lib/FreeRTOS/*.c lib/FreeRTOS/debug/*.cpp lib/FreeRTOS-P
 file(GLOB SOURCES
 				lib/FreeRTOS/portable${RTOS_PORT}/*.c
 				lib/FreeRTOS/portable/MemMang/heap_${RTOS_HEAP_TYPE}.c
-				lib/FreeRTOS/portable/Common/*.c
+				#lib/FreeRTOS/portable/Common/*.c
 	)
 
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=gnu99 -Wno-cast-function-type")

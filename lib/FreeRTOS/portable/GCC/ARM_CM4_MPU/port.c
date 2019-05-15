@@ -555,63 +555,63 @@ static void vPortEnableVFP( void )
 static void prvSetupMPU( void )
 {
 #if RTOS_USE_MPU
-extern uint32_t __privileged_functions_end__[];
-extern uint32_t __FLASH_segment_start__[];
-extern uint32_t __FLASH_segment_end__[];
-extern uint32_t __privileged_data_start__[];
-extern uint32_t __privileged_data_end__[];
+//extern uint32_t __privileged_functions_end__[];
+//extern uint32_t __FLASH_segment_start__[];
+//extern uint32_t __FLASH_segment_end__[];
+//extern uint32_t __privileged_data_start__[];
+//extern uint32_t __privileged_data_end__[];
 
 	/* Check the expected MPU is present. */
 	if( portMPU_TYPE_REG == portEXPECTED_MPU_TYPE_VALUE )
 	{
-		/* First setup the entire flash for unprivileged read only access. */
-		portMPU_REGION_BASE_ADDRESS_REG =	( ( uint32_t ) __FLASH_segment_start__ ) | /* Base address. */
-											( portMPU_REGION_VALID ) |
-											( portUNPRIVILEGED_FLASH_REGION );
+//		/* First setup the entire flash for unprivileged read only access. */
+//		portMPU_REGION_BASE_ADDRESS_REG =	( ( uint32_t ) __FLASH_segment_start__ ) | /* Base address. */
+//											( portMPU_REGION_VALID ) |
+//											( portUNPRIVILEGED_FLASH_REGION );
+//
+//		portMPU_REGION_ATTRIBUTE_REG =	( portMPU_REGION_READ_ONLY ) |
+//										( portMPU_REGION_CACHEABLE_BUFFERABLE ) |
+//										( prvGetMPURegionSizeSetting( ( uint32_t ) __FLASH_segment_end__ - ( uint32_t ) __FLASH_segment_start__ ) ) |
+//										( portMPU_REGION_ENABLE );
+//
+//		/* Setup the first 16K for privileged only access (even though less
+//		than 10K is actually being used).  This is where the kernel code is
+//		placed. */
+//		portMPU_REGION_BASE_ADDRESS_REG =	( ( uint32_t ) __FLASH_segment_start__ ) | /* Base address. */
+//											( portMPU_REGION_VALID ) |
+//											( portPRIVILEGED_FLASH_REGION );
+//
+//		portMPU_REGION_ATTRIBUTE_REG =	( portMPU_REGION_PRIVILEGED_READ_ONLY ) |
+//										( portMPU_REGION_CACHEABLE_BUFFERABLE ) |
+//										( prvGetMPURegionSizeSetting( ( uint32_t ) __privileged_functions_end__ - ( uint32_t ) __FLASH_segment_start__ ) ) |
+//										( portMPU_REGION_ENABLE );
+//
+//		/* Setup the privileged data RAM region.  This is where the kernel data
+//		is placed. */
+//		portMPU_REGION_BASE_ADDRESS_REG =	( ( uint32_t ) __privileged_data_start__ ) | /* Base address. */
+//											( portMPU_REGION_VALID ) |
+//											( portPRIVILEGED_RAM_REGION );
+//
+//		portMPU_REGION_ATTRIBUTE_REG =	( portMPU_REGION_PRIVILEGED_READ_WRITE ) |
+//										( portMPU_REGION_CACHEABLE_BUFFERABLE ) |
+//										prvGetMPURegionSizeSetting( ( uint32_t ) __privileged_data_end__ - ( uint32_t ) __privileged_data_start__ ) |
+//										( portMPU_REGION_ENABLE );
+//
+//		/* By default allow everything to access the general peripherals.  The
+//		system peripherals and registers are protected. */
+//		portMPU_REGION_BASE_ADDRESS_REG =	( portPERIPHERALS_START_ADDRESS ) |
+//											( portMPU_REGION_VALID ) |
+//											( portGENERAL_PERIPHERALS_REGION );
+//
+//		portMPU_REGION_ATTRIBUTE_REG =	( portMPU_REGION_READ_WRITE | portMPU_REGION_EXECUTE_NEVER ) |
+//										( prvGetMPURegionSizeSetting( portPERIPHERALS_END_ADDRESS - portPERIPHERALS_START_ADDRESS ) ) |
+//										( portMPU_REGION_ENABLE );
 
-		portMPU_REGION_ATTRIBUTE_REG =	( portMPU_REGION_READ_ONLY ) |
-										( portMPU_REGION_CACHEABLE_BUFFERABLE ) |
-										( prvGetMPURegionSizeSetting( ( uint32_t ) __FLASH_segment_end__ - ( uint32_t ) __FLASH_segment_start__ ) ) |
-										( portMPU_REGION_ENABLE );
-
-		/* Setup the first 16K for privileged only access (even though less
-		than 10K is actually being used).  This is where the kernel code is
-		placed. */
-		portMPU_REGION_BASE_ADDRESS_REG =	( ( uint32_t ) __FLASH_segment_start__ ) | /* Base address. */
-											( portMPU_REGION_VALID ) |
-											( portPRIVILEGED_FLASH_REGION );
-
-		portMPU_REGION_ATTRIBUTE_REG =	( portMPU_REGION_PRIVILEGED_READ_ONLY ) |
-										( portMPU_REGION_CACHEABLE_BUFFERABLE ) |
-										( prvGetMPURegionSizeSetting( ( uint32_t ) __privileged_functions_end__ - ( uint32_t ) __FLASH_segment_start__ ) ) |
-										( portMPU_REGION_ENABLE );
-
-		/* Setup the privileged data RAM region.  This is where the kernel data
-		is placed. */
-		portMPU_REGION_BASE_ADDRESS_REG =	( ( uint32_t ) __privileged_data_start__ ) | /* Base address. */
-											( portMPU_REGION_VALID ) |
-											( portPRIVILEGED_RAM_REGION );
-
-		portMPU_REGION_ATTRIBUTE_REG =	( portMPU_REGION_PRIVILEGED_READ_WRITE ) |
-										( portMPU_REGION_CACHEABLE_BUFFERABLE ) |
-										prvGetMPURegionSizeSetting( ( uint32_t ) __privileged_data_end__ - ( uint32_t ) __privileged_data_start__ ) |
-										( portMPU_REGION_ENABLE );
-
-		/* By default allow everything to access the general peripherals.  The
-		system peripherals and registers are protected. */
-		portMPU_REGION_BASE_ADDRESS_REG =	( portPERIPHERALS_START_ADDRESS ) |
-											( portMPU_REGION_VALID ) |
-											( portGENERAL_PERIPHERALS_REGION );
-
-		portMPU_REGION_ATTRIBUTE_REG =	( portMPU_REGION_READ_WRITE | portMPU_REGION_EXECUTE_NEVER ) |
-										( prvGetMPURegionSizeSetting( portPERIPHERALS_END_ADDRESS - portPERIPHERALS_START_ADDRESS ) ) |
-										( portMPU_REGION_ENABLE );
-
-		/* Enable the memory fault exception. */
-		portNVIC_SYS_CTRL_STATE_REG |= portNVIC_MEM_FAULT_ENABLE;
-
-		/* Enable the MPU with the background region configured. */
-		portMPU_CTRL_REG |= ( portMPU_ENABLE | portMPU_BACKGROUND_ENABLE );
+//		/* Enable the memory fault exception. */
+//		portNVIC_SYS_CTRL_STATE_REG |= portNVIC_MEM_FAULT_ENABLE;
+//
+//		/* Enable the MPU with the background region configured. */
+//		portMPU_CTRL_REG |= ( portMPU_ENABLE | portMPU_BACKGROUND_ENABLE );
 	}
 #endif
 }
