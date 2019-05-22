@@ -2234,9 +2234,10 @@ static void prvCopyDataFromQueue( Queue_t * const pxQueue, void * const pvBuffer
 			mtCOVERAGE_TEST_MARKER();
 		}
 
-		if(pxQueue->cellMoveOut != NULL)
-			pxQueue->cellMoveOut(pxQueue->u.xQueue.pcReadFrom, pvBuffer, copy, pxQueue->customController);
-		else
+		if(pxQueue->cellMoveOut != NULL) {
+            pxQueue->cellMoveOut(pxQueue->u.xQueue.pcReadFrom, pvBuffer, copy, pxQueue->customController);
+            pxQueue->cellDestructor(pxQueue->u.xQueue.pcReadFrom, pxQueue->customController);//Отработанную ячейку нужно уничтожить, поскольку другого шанса вызвать деструктор для нее уже не будет.
+        }else
 			( void ) memcpy( ( void * ) pvBuffer, ( void * ) pxQueue->u.xQueue.pcReadFrom, ( size_t ) pxQueue->uxItemSize ); /*lint !e961 !e418 !e9087 MISRA exception as the casts are only redundant for some ports.  Also previous logic ensures a null pointer can only be passed to memcpy() when the count is 0.  Cast to void required by function signature and safe as no alignment requirement and copy length specified in bytes. */
 	}
 }

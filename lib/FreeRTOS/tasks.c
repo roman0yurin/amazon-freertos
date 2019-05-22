@@ -5129,6 +5129,7 @@ void stackBounds(TaskHandle_t task, size_t **begin, size_t **end, size_t **stack
 	}
 }
 
+#if configCHECK_FOR_STACK_OVERFLOW > 1
 /**Проверяем, что небыло превышения стека, с запасом в buffer (в словах, по отношению к текущему положению**/
 void check4StackOverflow(size_t buffer){
 	if(pxCurrentTCB != NULL) {
@@ -5137,4 +5138,5 @@ void check4StackOverflow(size_t buffer){
 			vApplicationStackOverflowHook((TaskHandle_t) pxCurrentTCB, pxCurrentTCB->pcTaskName);
 	}
 }
+#endif
 
