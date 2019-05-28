@@ -338,7 +338,13 @@ typedef struct tskTaskControlBlock /* The old naming convention is used to preve
 
 	#if( configUSE_POSIX_ERRNO == 1 )
 		int iTaskErrno;
-	#endif
+    #endif
+
+	/**Указатель на пользовательский контроллер потока**/
+	void *pvParametersPtr;
+
+	/**Указатель на функцию, которая работает в потоке**/
+	void (*threadFunction)(void *);
 
 } tskTCB;
 
@@ -641,6 +647,8 @@ static void prvAddNewTaskToReadyList( TCB_t *pxNewTCB ) PRIVILEGED_FUNCTION;
 			xReturn = NULL;
 		}
 
+        pxNewTCB->pvParametersPtr = pvParameters;
+        pxNewTCB->threadFunction = pxTaskCode;
 		return xReturn;
 	}
 
@@ -829,6 +837,8 @@ static void prvAddNewTaskToReadyList( TCB_t *pxNewTCB ) PRIVILEGED_FUNCTION;
 			xReturn = errCOULD_NOT_ALLOCATE_REQUIRED_MEMORY;
 		}
 
+		pxNewTCB->pvParametersPtr = pvParameters;
+		pxNewTCB->threadFunction = pxTaskCode;
 		return xReturn;
 	}
 
@@ -5139,4 +5149,13 @@ void check4StackOverflow(size_t buffer){
 	}
 }
 #endif
+
+/*-----------------------------------------------------------*/
+void *getTaskPvParameter(TaskHandle_t task){
+    return ((TCB_t *)task)->pvParametersPtr;
+}
+
+TaskFunction_t getTaskFunction(TaskHandle_t task){
+    return ((TCB_t *)task)->threadFunction;
+}
 

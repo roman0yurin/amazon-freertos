@@ -2327,6 +2327,12 @@ void stackBounds(TaskHandle_t task, size_t **begin, size_t **end, size_t **stack
 /**Проверяем, что небыло превышения стека, с запасом в buffer (в словах, по отношению к текущему положению**/
 void check4StackOverflow(size_t buffer);
 
+/**Извлечь пользовательский параметр, заданный при создании данной задачи**/
+void *getTaskPvParameter(TaskHandle_t task);
+
+/**Получить указатель на функцию, вызывающую данный поток**/
+TaskFunction_t getTaskFunction(TaskHandle_t task);
+
 #ifdef __cplusplus
 }
 #endif

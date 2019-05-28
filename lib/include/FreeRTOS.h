@@ -1043,7 +1043,10 @@ typedef struct xSTATIC_TCB
 	#endif
 	#if ( configUSE_POSIX_ERRNO == 1 )
 		int				iDummy22;
-	#endif
+    #endif
+
+    void *pvParametersPtrDummy;
+    void (*threadFunctionDummy)(void *);
 } StaticTask_t;
 
 /*
