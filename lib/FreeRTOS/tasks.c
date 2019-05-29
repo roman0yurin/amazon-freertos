@@ -641,14 +641,13 @@ static void prvAddNewTaskToReadyList( TCB_t *pxNewTCB ) PRIVILEGED_FUNCTION;
 
 			prvInitialiseNewTask( pxTaskCode, pcName, ulStackDepth, pvParameters, uxPriority, &xReturn, pxNewTCB, NULL );
 			prvAddNewTaskToReadyList( pxNewTCB );
+            pxNewTCB->pvParametersPtr = pvParameters;
+            pxNewTCB->threadFunction = pxTaskCode;
 		}
 		else
 		{
 			xReturn = NULL;
 		}
-
-        pxNewTCB->pvParametersPtr = pvParameters;
-        pxNewTCB->threadFunction = pxTaskCode;
 		return xReturn;
 	}
 
