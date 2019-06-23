@@ -1975,7 +1975,7 @@ Queue_t * const pxQueue = xQueue;
 
 UBaseType_t uxQueueMessagesWaiting( const QueueHandle_t xQueue )
 {
-UBaseType_t uxReturn;
+    UBaseType_t uxReturn;
 
 	configASSERT( xQueue );
 
