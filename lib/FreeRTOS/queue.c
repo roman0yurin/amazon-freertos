@@ -1150,7 +1150,6 @@ Queue_t * const pxQueue = xQueue;
 		}
 	}
 	portCLEAR_INTERRUPT_MASK_FROM_ISR( uxSavedInterruptStatus );
-
 	return xReturn;
 }
 /*-----------------------------------------------------------*/
